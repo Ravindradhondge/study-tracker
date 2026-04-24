@@ -20,6 +20,7 @@ interface Task {
   tag?: string;
   date?: string;
   time?: string;
+  duration?: number | null;
   priority?: 'high' | 'medium' | 'low';
   notes?: string;
 }
