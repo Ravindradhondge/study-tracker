@@ -1,0 +1,16 @@
+{
+  "name": "Study Tracker",
+  "short_name": "StudyTracker",
+  "description": "A productivity app to track your study sessions.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#00f2fe",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
