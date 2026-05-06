@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  BookOpen, Clock, Dumbbell, Flame, Plus, 
+  BookOpen, Flame, Plus, 
   Trash2, Play, Pause, RotateCcw, Calendar,
   Settings, X, Camera, Image as ImageIcon,
   LogOut, Headphones, LayoutDashboard
@@ -188,10 +188,7 @@ function App() {
 
   const toggleTimer = () => setIsRunning(!isRunning);
   
-  const resetTimer = () => {
-    setIsRunning(false);
-    setTimeLeft(timerMode === 'focus' ? (focusHours * 60 + focusMinutes) * 60 : breakMinutes * 60);
-  };
+
 
   const switchMode = (mode: 'focus' | 'break') => {
     setIsRunning(false);
