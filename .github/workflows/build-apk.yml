@@ -1,9 +1,11 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch:  # Manual trigger from GitHub
+  workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore:
+      - '.github/workflows/**'
 
 jobs:
   build-apk:
@@ -19,216 +21,149 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Bubblewrap
-        run: npm install -g @nicolo-ribaudo/fetch-and-run @nicolo-ribaudo/chokidar @nicolo-ribaudo/recursive-readdir && npm install -g @nicolo-ribaudo/bubblewrap || npm install -g @nicolo-ribaudo/fetch-and-run && npm install -g @nicolo-ribaudo/bubblewrap || npm install -g @nicolo-ribaudo/bubblewrap || true
-
-      - name: Create TWA project
+      - name: Create Android Project
         run: |
-          mkdir -p twa-build && cd twa-build
-          
-          # Create twa-manifest.json
-          cat > twa-manifest.json << 'EOF'
-          {
-            "packageId": "app.vercel.study_tracker_two_xi",
-            "host": "study-tracker-two-xi.vercel.app",
-            "name": "Study Tracker",
-            "launcherName": "Study Tracker",
-            "display": "standalone",
-            "themeColor": "#0B0E14",
-            "navigationColor": "#0B0E14",
-            "backgroundColor": "#0B0E14",
-            "enableNotifications": false,
-            "startUrl": "/",
-            "iconUrl": "https://study-tracker-two-xi.vercel.app/icon-512x512.png",
-            "maskableIconUrl": "https://study-tracker-two-xi.vercel.app/icon-512x512.png",
-            "shortcuts": [],
-            "signingKey": {
-              "path": "./study-tracker.keystore",
-              "alias": "study-tracker"
-            },
-            "appVersionCode": 1,
-            "appVersionName": "1.0.0",
-            "splashScreenFadeOutDuration": 300,
-            "enableSiteSettingsShortcut": true,
-            "isChromeOSOnly": false,
-            "orientation": "portrait",
-            "fingerprints": []
+          mkdir -p android-app/app/src/main/java/app/studytracker
+          mkdir -p android-app/app/src/main/res/values
+          mkdir -p android-app/app/src/main/res/drawable
+          mkdir -p android-app/app/src/main/res/mipmap-hdpi
+          mkdir -p android-app/app/src/main/res/mipmap-mdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xhdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android-app/app/src/main/res/layout
+          mkdir -p android-app/gradle/wrapper
+
+      - name: Download App Icon
+        run: |
+          curl -L "https://study-tracker-two-xi.vercel.app/icon-512x512.png" -o android-app/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          curl -L "https://study-tracker-two-xi.vercel.app/icon-192x192.png" -o android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android-app/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android-app/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android-app/app/src/main/res/mipmap-mdpi/ic_launcher.png
+
+      - name: Create MainActivity.java
+        run: |
+          cat > android-app/app/src/main/java/app/studytracker/MainActivity.java << 'JAVAEOF'
+          package app.studytracker;
+
+          import android.app.Activity;
+          import android.graphics.Color;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.Window;
+          import android.view.WindowManager;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.widget.ProgressBar;
+          import android.widget.RelativeLayout;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  requestWindowFeature(Window.FEATURE_NO_TITLE);
+                  getWindow().setFlags(
+                      WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                      WindowManager.LayoutParams.FLAG_FULLSCREEN
+                  );
+                  getWindow().setStatusBarColor(Color.parseColor("#0B0E14"));
+                  getWindow().setNavigationBarColor(Color.parseColor("#0B0E14"));
+
+                  RelativeLayout layout = new RelativeLayout(this);
+                  layout.setBackgroundColor(Color.parseColor("#0B0E14"));
+
+                  webView = new WebView(this);
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setDatabaseEnabled(true);
+                  settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+                  settings.setAllowFileAccess(true);
+                  settings.setMediaPlaybackRequiresUserGesture(false);
+                  settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                  settings.setUseWideViewPort(true);
+                  settings.setLoadWithOverviewMode(true);
+
+                  webView.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                          if (url.contains("study-tracker-two-xi.vercel.app")) {
+                              view.loadUrl(url);
+                              return true;
+                          }
+                          return false;
+                      }
+                  });
+
+                  webView.setWebChromeClient(new WebChromeClient());
+                  webView.setBackgroundColor(Color.parseColor("#0B0E14"));
+
+                  RelativeLayout.LayoutParams webParams = new RelativeLayout.LayoutParams(
+                      RelativeLayout.LayoutParams.MATCH_PARENT,
+                      RelativeLayout.LayoutParams.MATCH_PARENT
+                  );
+                  layout.addView(webView, webParams);
+
+                  setContentView(layout);
+                  webView.loadUrl("https://study-tracker-two-xi.vercel.app/");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
           }
-          EOF
+          JAVAEOF
 
-      - name: Build APK with Gradle
+      - name: Create AndroidManifest.xml
         run: |
-          mkdir -p twa-build && cd twa-build
-          
-          # Create a minimal TWA Android project
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/mipmap-xxxhdpi
-          mkdir -p app/src/main/java/app/vercel/study_tracker_two_xi
-          mkdir -p gradle/wrapper
-          
-          # Download icon
-          curl -L "https://study-tracker-two-xi.vercel.app/icon-512x512.png" -o app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-          
-          # Create strings.xml
-          cat > app/src/main/res/values/strings.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <string name="app_name">Study Tracker</string>
-              <string name="asset_statements">[{"relation": ["delegate_permission/common.handle_all_urls"], "target": {"namespace": "web", "site": "https://study-tracker-two-xi.vercel.app"}}]</string>
-          </resources>
-          EOF
-          
-          # Create colors.xml
-          cat > app/src/main/res/values/colors.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <color name="colorPrimary">#0B0E14</color>
-              <color name="colorPrimaryDark">#0B0E14</color>
-              <color name="navigationColor">#0B0E14</color>
-              <color name="navigationColorDark">#0B0E14</color>
-              <color name="navigationDividerColor">#0B0E14</color>
-              <color name="backgroundColor">#0B0E14</color>
-          </resources>
-          EOF
-          
-          # Create styles.xml
-          cat > app/src/main/res/values/styles.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <style name="Theme.StudyTracker" parent="Theme.AppCompat.NoActionBar">
-                  <item name="android:windowBackground">@color/backgroundColor</item>
-                  <item name="colorPrimary">@color/colorPrimary</item>
-              </style>
-          </resources>
-          EOF
-          
-          # Create AndroidManifest.xml
-          cat > app/src/main/AndroidManifest.xml << 'EOF'
+          cat > android-app/app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="app.vercel.study_tracker_two_xi">
-              
+              package="app.studytracker">
+
               <uses-permission android:name="android.permission.INTERNET" />
-              
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
               <application
                   android:allowBackup="true"
                   android:icon="@mipmap/ic_launcher"
-                  android:label="@string/app_name"
-                  android:theme="@style/Theme.StudyTracker"
-                  android:usesCleartextTraffic="true">
-                  
-                  <meta-data
-                      android:name="asset_statements"
-                      android:resource="@string/asset_statements" />
-                  
+                  android:label="Study Tracker"
+                  android:usesCleartextTraffic="true"
+                  android:hardwareAccelerated="true">
+
                   <activity
-                      android:name="android.browser.customtabs.CustomTabActivity"
-                      android:exported="true">
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:screenOrientation="portrait"
+                      android:configChanges="orientation|screenSize|keyboardHidden"
+                      android:windowSoftInputMode="adjustResize">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                      <intent-filter android:autoVerify="true">
-                          <action android:name="android.intent.action.VIEW" />
-                          <category android:name="android.intent.category.DEFAULT" />
-                          <category android:name="android.intent.category.BROWSABLE" />
-                          <data android:scheme="https" android:host="study-tracker-two-xi.vercel.app" />
                       </intent-filter>
                   </activity>
               </application>
           </manifest>
           EOF
-          
-          # Create LauncherActivity.java
-          cat > app/src/main/java/app/vercel/study_tracker_two_xi/LauncherActivity.java << 'EOF'
-          package app.vercel.study_tracker_two_xi;
-          
-          import android.app.Activity;
-          import android.content.Intent;
-          import android.net.Uri;
-          import android.os.Bundle;
-          
-          public class LauncherActivity extends Activity {
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-                  Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://study-tracker-two-xi.vercel.app/"));
-                  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                  startActivity(intent);
-                  finish();
-              }
-          }
-          EOF
-          
-          # Create build.gradle (project)
-          cat > build.gradle << 'EOF'
-          buildscript {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-              dependencies {
-                  classpath 'com.android.tools.build:gradle:8.2.0'
-              }
-          }
-          
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          EOF
-          
-          # Create app/build.gradle
-          cat > app/build.gradle << 'EOF'
-          plugins {
-              id 'com.android.application'
-          }
-          
-          android {
-              namespace 'app.vercel.study_tracker_two_xi'
-              compileSdk 34
-              
-              defaultConfig {
-                  applicationId "app.vercel.study_tracker_two_xi"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0.0"
-              }
-              
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                  }
-                  debug {
-                      minifyEnabled false
-                  }
-              }
-              
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-          }
-          
-          dependencies {
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.browser:browser:1.7.0'
-          }
-          EOF
-          
-          # Create settings.gradle
-          cat > settings.gradle << 'EOF'
+
+      - name: Create build files
+        run: |
+          # settings.gradle
+          cat > android-app/settings.gradle << 'EOF'
           pluginManagement {
               repositories {
                   google()
@@ -236,40 +171,83 @@ jobs:
                   gradlePluginPortal()
               }
           }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
           rootProject.name = "StudyTracker"
           include ':app'
           EOF
-          
-          # Create gradle.properties
-          cat > gradle.properties << 'EOF'
+
+          # build.gradle (root)
+          cat > android-app/build.gradle << 'EOF'
+          plugins {
+              id 'com.android.application' version '8.2.0' apply false
+          }
+          EOF
+
+          # app/build.gradle
+          cat > android-app/app/build.gradle << 'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'app.studytracker'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "app.studytracker"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+
+          # gradle.properties
+          cat > android-app/gradle.properties << 'EOF'
           android.useAndroidX=true
           org.gradle.jvmargs=-Xmx2048m
           EOF
-          
-          # Download Gradle wrapper
-          curl -L "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o gradle-8.5-bin.zip
-          mkdir -p gradle/wrapper
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+
+          # gradle-wrapper.properties
+          cat > android-app/gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
           distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
-          
-          # Use gradle directly
-          gradle wrapper --gradle-version 8.5 || true
-          
-          # Build debug APK
-          chmod +x gradlew 2>/dev/null || true
-          ./gradlew assembleDebug --no-daemon 2>&1 || gradle assembleDebug --no-daemon 2>&1
-          
-          # Find and copy APK
-          find . -name "*.apk" -exec cp {} ../study-tracker.apk \;
+
+      - name: Build APK
+        working-directory: android-app
+        run: |
+          gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Copy APK
+        run: |
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk ./StudyTracker.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Study-Tracker-APK
-          path: study-tracker.apk
-          if-no-files-found: warn
+          name: StudyTracker-APK
+          path: StudyTracker.apk
