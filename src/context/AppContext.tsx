@@ -93,8 +93,8 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   const todayStr = getLocalYYYYMMDD(new Date());
   
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>({ uid: 'test', name: 'Test', phone: '1234567890' });
+  const [authLoading, setAuthLoading] = useState(false);
   const [loginStep, setLoginStep] = useState<'phone' | 'otp' | 'name'>('phone');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   

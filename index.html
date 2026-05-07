@@ -11,6 +11,23 @@
   <body>
     <div id="recaptcha-container"></div>
     <div id="root"></div>
+    <script>
+      // Automatically unregister any old broken service workers that cause white screens
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      
+      // Auto-reload on chunk load error
+      window.addEventListener('error', function(e) {
+        if (e.message && e.message.match(/Failed to fetch dynamically imported module/i)) {
+          window.location.reload(true);
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
