@@ -15,10 +15,10 @@ import NotificationBanner from './components/Tasks/NotificationBanner';
 import './index.css';
 
 function AppContent() {
-  const { user, authLoading, tasks, todayStr } = useApp();
+  const { user, authLoading, tasks, todayStr, setNotification } = useApp();
 
   // Enable task time notifications
-  useTaskReminders(tasks, todayStr);
+  useTaskReminders(tasks, todayStr, setNotification);
 
   if (authLoading) {
     return <div className="app-container loading"><div className="spinner" /></div>;

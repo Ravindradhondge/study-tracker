@@ -7,14 +7,22 @@ export function NotificationModal() {
   const { notification, setNotification, switchMode, timerMode } = useApp();
   if (!notification) return null;
 
+  const isTimerNotification = notification.title.includes('Session Complete') || notification.title.includes('Break Over');
+
   return (
     <div className="modal-overlay" onClick={() => setNotification(null)}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title accent">{notification.title}</h2>
         <p className="modal-body">{notification.message}</p>
-        <button className="btn-primary btn-full" onClick={() => { setNotification(null); switchMode(timerMode === 'focus' ? 'break' : 'focus'); }}>
-          Continue
-        </button>
+        {isTimerNotification ? (
+          <button className="btn-primary btn-full" onClick={() => { setNotification(null); switchMode(timerMode === 'focus' ? 'break' : 'focus'); }}>
+            Continue
+          </button>
+        ) : (
+          <button className="btn-primary btn-full" onClick={() => setNotification(null)}>
+            👍 Got it, Let's Go!
+          </button>
+        )}
       </div>
     </div>
   );
