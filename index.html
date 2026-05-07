@@ -6,39 +6,21 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#00f2fe" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Daily Planner</title>
+    <title>Study Tracker</title>
   </head>
   <body>
     <div id="recaptcha-container"></div>
     <div id="root"></div>
     <script>
-      // Automatically unregister any old broken service workers that cause white screens
+      // Unregister any stale service workers to prevent white-screen cache trap
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for(let registration of registrations) {
-            registration.unregister();
+          for(var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
           }
         });
       }
-      
-      // Auto-reload on chunk load error
-      window.addEventListener('error', function(e) {
-        if (e.message && e.message.match(/Failed to fetch dynamically imported module/i)) {
-          window.location.reload(true);
-        }
-      });
     </script>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
-        });
-      }
-    </script>
   </body>
 </html>
