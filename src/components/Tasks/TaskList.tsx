@@ -18,6 +18,11 @@ export default function TaskList() {
   const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
   const sortedTasks = [...displayTasks].sort((a, b) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    // Sort by scheduled time (tasks with time come first, earlier times first)
+    if (a.time && b.time) {
+      if (a.time !== b.time) return a.time.localeCompare(b.time);
+    } else if (a.time && !b.time) return -1;
+    else if (!a.time && b.time) return 1;
     const pA = a.priority || 'medium';
     const pB = b.priority || 'medium';
     return priorityOrder[pA] - priorityOrder[pB];

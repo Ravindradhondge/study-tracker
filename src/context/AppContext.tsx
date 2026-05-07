@@ -24,7 +24,7 @@ interface AppContextType {
   completedCount: number;
   streak: number;
   
-  addTask: (title: string, duration: number | null, type: string, tag: string | null, priority: 'high' | 'medium' | 'low') => Promise<void>;
+  addTask: (title: string, duration: number | null, type: string, tag: string | null, priority: 'high' | 'medium' | 'low', scheduledTime?: string | null) => Promise<void>;
   toggleTask: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   editTask: (id: string, updates: Partial<Task>) => Promise<void>;
@@ -355,7 +355,7 @@ export function AppProvider({ children }: AppProviderProps) {
     await updateDoc(doc(db, "users", user.uid, "tasks", id), updates);
   };
 
-  const addTask = async (title: string, duration: number | null, type: string, tag: string | null, priority: 'high' | 'medium' | 'low') => {
+  const addTask = async (title: string, duration: number | null, type: string, tag: string | null, priority: 'high' | 'medium' | 'low', scheduledTime?: string | null) => {
     if (!title.trim()) { alert("Please enter a Task Title"); return; }
     if (!user) return;
     try {
@@ -364,7 +364,7 @@ export function AppProvider({ children }: AppProviderProps) {
       const hasTags = currentSection && currentSection.tags && currentSection.tags.length > 0;
       await setDoc(doc(db, "users", user.uid, "tasks", id), {
         title, completed: false, type, tag: hasTags ? tag : null, duration,
-        date: selectedViewDate, priority, notes: ''
+        date: selectedViewDate, priority, notes: '', time: scheduledTime || null
       });
     } catch (err: any) {
       alert("Error adding task: " + err.message);
