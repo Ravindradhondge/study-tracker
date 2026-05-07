@@ -185,6 +185,40 @@ body {
 .progress-bar-bg { height: 8px; background: rgba(255, 255, 255, 0.2); border-radius: 4px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: #fff; border-radius: 4px; transition: width 0.5s ease; }
 
+/* Notification Banner */
+.notification-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  animation: slideDown 0.3s ease;
+}
+.notification-banner svg:first-child {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.notification-banner span {
+  flex: 1;
+}
+.notification-banner.denied {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+.notification-banner.denied svg:first-child {
+  color: var(--warning);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Task Form */
 .add-task-container {
   background: var(--bg-surface); border: 1px solid var(--border);

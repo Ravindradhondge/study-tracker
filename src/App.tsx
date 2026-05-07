@@ -10,10 +10,15 @@ import FocusTimer from './components/Timer/FocusTimer';
 import StatsWidget from './components/Timer/StatsWidget';
 import TrackingWidget from './components/Tracking/TrackingWidget';
 import { NotificationModal, ScreenshotModal, ManageSectionsModal, ExportModal } from './components/Modals/Modals';
+import { useTaskReminders } from './hooks/useTaskReminders';
+import NotificationBanner from './components/Tasks/NotificationBanner';
 import './index.css';
 
 function AppContent() {
-  const { user, authLoading } = useApp();
+  const { user, authLoading, tasks, todayStr } = useApp();
+
+  // Enable task time notifications
+  useTaskReminders(tasks, todayStr);
 
   if (authLoading) {
     return <div className="app-container loading"><div className="spinner" /></div>;
@@ -29,6 +34,7 @@ function AppContent() {
         <Sidebar />
         <main className="main-content">
           <Header />
+          <NotificationBanner />
           <ProgressBanner />
           <TaskForm />
           <TaskList />
@@ -55,3 +61,4 @@ export default function App() {
     </AppProvider>
   );
 }
+
