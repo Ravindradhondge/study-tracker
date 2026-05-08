@@ -45,7 +45,7 @@ export function useTaskReminders(
               tag: `task-${task.id}`,
               vibrate: [200, 100, 200, 100, 200],
               requireInteraction: true,
-            });
+            } as any);
           }).catch(() => {});
         } else {
           new Notification(title, {

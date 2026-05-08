@@ -272,6 +272,13 @@ body {
   color: var(--text-secondary);
 }
 
+.clock-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 499;
+}
+
 .clock-picker-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -876,19 +883,27 @@ body {
   .form-input, .form-select { width: 100%; }
   .duration-input { flex: 1 1 auto !important; width: 100% !important; }
   .analog-clock-picker-container { flex: 1 1 auto !important; width: 100% !important; }
-  .clock-picker-dropdown { 
-    left: 0; right: 0; 
-    transform: none;
-    width: auto;
-    max-width: 300px;
-    margin: 0 auto;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  .clock-picker-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
   }
-  @keyframes clockDropIn {
-    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  .clock-picker-dropdown { 
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    bottom: auto !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 2rem) !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    z-index: 500 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    animation: clockDropInMobile 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+  @keyframes clockDropInMobile {
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.9); }
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
   .edit-time-input { flex: 1 1 auto !important; width: 100% !important; }

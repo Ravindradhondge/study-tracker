@@ -184,132 +184,135 @@ export default function AnalogClockPicker({ value, onChange }: AnalogClockPicker
       </button>
 
       {open && (
-        <div className="clock-picker-dropdown">
-          {/* Time Display Header */}
-          <div className="clock-picker-header">
-            <button
-              type="button"
-              className={`clock-time-segment ${mode === 'hour' ? 'active' : ''}`}
-              onClick={() => setMode('hour')}
-            >
-              {selectedHour.toString().padStart(2, '0')}
-            </button>
-            <span className="clock-time-colon">:</span>
-            <button
-              type="button"
-              className={`clock-time-segment ${mode === 'minute' ? 'active' : ''}`}
-              onClick={() => setMode('minute')}
-            >
-              {selectedMinute.toString().padStart(2, '0')}
-            </button>
-            <div className="ampm-toggle">
+        <>
+          <div className="clock-picker-overlay" onClick={handleCancel} />
+          <div className="clock-picker-dropdown">
+            {/* Time Display Header */}
+            <div className="clock-picker-header">
               <button
                 type="button"
-                className={`ampm-btn ${ampm === 'AM' ? 'active' : ''}`}
-                onClick={() => setAmpm('AM')}
+                className={`clock-time-segment ${mode === 'hour' ? 'active' : ''}`}
+                onClick={() => setMode('hour')}
               >
-                AM
+                {selectedHour.toString().padStart(2, '0')}
               </button>
+              <span className="clock-time-colon">:</span>
               <button
                 type="button"
-                className={`ampm-btn ${ampm === 'PM' ? 'active' : ''}`}
-                onClick={() => setAmpm('PM')}
+                className={`clock-time-segment ${mode === 'minute' ? 'active' : ''}`}
+                onClick={() => setMode('minute')}
               >
-                PM
+                {selectedMinute.toString().padStart(2, '0')}
               </button>
+              <div className="ampm-toggle">
+                <button
+                  type="button"
+                  className={`ampm-btn ${ampm === 'AM' ? 'active' : ''}`}
+                  onClick={() => setAmpm('AM')}
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  className={`ampm-btn ${ampm === 'PM' ? 'active' : ''}`}
+                  onClick={() => setAmpm('PM')}
+                >
+                  PM
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Clock Face */}
-          <div
-            className="clock-face"
-            ref={clockRef}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {/* Clock hand */}
+            {/* Clock Face */}
             <div
-              className="clock-hand-container"
-              style={{ transform: `rotate(${handAngle}deg)` }}
+              className="clock-face"
+              ref={clockRef}
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
-              <div className="clock-hand-line" />
-              <div className="clock-hand-dot" />
+              {/* Clock hand */}
+              <div
+                className="clock-hand-container"
+                style={{ transform: `rotate(${handAngle}deg)` }}
+              >
+                <div className="clock-hand-line" />
+                <div className="clock-hand-dot" />
+              </div>
+              <div className="clock-center-dot" />
+
+              {/* Numbers */}
+              {mode === 'hour'
+                ? hours.map((h, i) => {
+                    const angle = (i * 30 - 90) * (Math.PI / 180);
+                    const radius = 90;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    return (
+                      <button
+                        key={h}
+                        type="button"
+                        className={`clock-number ${selectedHour === h ? 'selected' : ''}`}
+                        style={{
+                          left: `calc(50% + ${x}px)`,
+                          top: `calc(50% + ${y}px)`,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedHour(h);
+                          setTimeout(() => setMode('minute'), 200);
+                        }}
+                      >
+                        {h}
+                      </button>
+                    );
+                  })
+                : minutes.map((m, i) => {
+                    const angle = (i * 30 - 90) * (Math.PI / 180);
+                    const radius = 90;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        className={`clock-number ${selectedMinute === m ? 'selected' : ''}`}
+                        style={{
+                          left: `calc(50% + ${x}px)`,
+                          top: `calc(50% + ${y}px)`,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMinute(m);
+                        }}
+                      >
+                        {m.toString().padStart(2, '0')}
+                      </button>
+                    );
+                  })}
             </div>
-            <div className="clock-center-dot" />
 
-            {/* Numbers */}
-            {mode === 'hour'
-              ? hours.map((h, i) => {
-                  const angle = (i * 30 - 90) * (Math.PI / 180);
-                  const radius = 90;
-                  const x = Math.cos(angle) * radius;
-                  const y = Math.sin(angle) * radius;
-                  return (
-                    <button
-                      key={h}
-                      type="button"
-                      className={`clock-number ${selectedHour === h ? 'selected' : ''}`}
-                      style={{
-                        left: `calc(50% + ${x}px)`,
-                        top: `calc(50% + ${y}px)`,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedHour(h);
-                        setTimeout(() => setMode('minute'), 200);
-                      }}
-                    >
-                      {h}
-                    </button>
-                  );
-                })
-              : minutes.map((m, i) => {
-                  const angle = (i * 30 - 90) * (Math.PI / 180);
-                  const radius = 90;
-                  const x = Math.cos(angle) * radius;
-                  const y = Math.sin(angle) * radius;
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      className={`clock-number ${selectedMinute === m ? 'selected' : ''}`}
-                      style={{
-                        left: `calc(50% + ${x}px)`,
-                        top: `calc(50% + ${y}px)`,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedMinute(m);
-                      }}
-                    >
-                      {m.toString().padStart(2, '0')}
-                    </button>
-                  );
-                })}
-          </div>
+            {/* Mode indicator */}
+            <div className="clock-mode-label">
+              {mode === 'hour' ? 'Select Hour' : 'Select Minutes'}
+            </div>
 
-          {/* Mode indicator */}
-          <div className="clock-mode-label">
-            {mode === 'hour' ? 'Select Hour' : 'Select Minutes'}
-          </div>
-
-          {/* Actions */}
-          <div className="clock-picker-actions">
-            <button type="button" className="clock-action-btn clear" onClick={handleClear}>
-              Clear
-            </button>
-            <div className="clock-action-right">
-              <button type="button" className="clock-action-btn cancel" onClick={handleCancel}>
-                <X size={14} /> Cancel
+            {/* Actions */}
+            <div className="clock-picker-actions">
+              <button type="button" className="clock-action-btn clear" onClick={handleClear}>
+                Clear
               </button>
-              <button type="button" className="clock-action-btn confirm" onClick={handleConfirm}>
-                <Check size={14} /> Set
-              </button>
+              <div className="clock-action-right">
+                <button type="button" className="clock-action-btn cancel" onClick={handleCancel}>
+                  <X size={14} /> Cancel
+                </button>
+                <button type="button" className="clock-action-btn confirm" onClick={handleConfirm}>
+                  <Check size={14} /> Set
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
